@@ -5,16 +5,16 @@
 # @version 0.1
 
 # Set the project, sources and build directory
-PROJDIR := $(realpath $(CURDIR))
-SOURCEDIR := $(PROJDIR)/sources
-INCDIR := $(PROJDIR)/includes
-BUILDDIR := $(PROJDIR)/build
+SOURCEDIR=sources/
+INCDIR=includes/
+BUILDDIR=build/
 
+# Define include directory
+INCLUDES = $(addprefix -I, $(INCDIR))
 
 # Set command for OS
 MKDIR=mkdir -p
 RM=rm -rf
-
 
 # Set variables of compilations
 CC=gcc
@@ -22,7 +22,7 @@ CFLAGS= -Wall -Wextra -Werror
 LDFLAGS=
 EXEC=ft_nm
 DEBUG=yes
-VERBOSE=FALSE
+VERBOSE=TRUE
 
 # Add flag for debugging
 ifeq ($(DEBUG), yes)
@@ -36,53 +36,42 @@ else
 	HIDE = @
 endif
 
-# Define include directory
-INCLUDES = $(addprefix -I, $(INCDIR))
 
-# Create a alist of *.c sources in SOURCEDIR
-SOURCES = $(wildcard $(SOURCEDIR)/*.c)
+# Create a list of *.c sources in SOURCEDIR
+SOURCES = $(wildcard $(SOURCEDIR)*.c)
 
 # Define objects for all sources
-OBJS := $(subst $(SOURCEDIR), $(BUILDDIR), $(SOURCES:.c=.o))
+OBJS = $(patsubst ${SOURCEDIR}%.c,${BUILDDIR}%.o,${SOURCES})
 
 # Define dependencies files for all objects
-
-DEPS = $(OBJS:.o=.d)a
+DEPS = $(OBJS:.o=.d)
 
 # Remove space after separator
-
 PSEP = $(strip $(SEP))
 
-# Define the function that will generate each rule
+# Creation of object files
+${BUILDDIR}%.o:	${SOURCEDIR}%.c ${INCLUDES}
+	$(HIDE)${CC} -c ${CFLAGS} -o $@ $<
 
-define generateRules
-$(1)/%.o: %.c
-	@echo Building $$@
-	$(HIDE)$(CC) -c $$(INCLUDES) -o $$(subst /,$$(PSEP),$$@) $$(subst /,$$(PSEP),$$<) -MMD
-endef
+# Creation of the executable
+$(EXEC): ${OBJS}
+	${CC} ${CFLAGS} -o ${EXEC} ${OBJS} ${LDFLAGS}
 
-all: directories $(EXEC)
-
-$(EXEC) : $(OBJS)
-	$(HIDE)echo Linking $@
-	$(HIDE)$(CC)$(OBJS) -o $(EXEC)
+all: directories ${EXEC}
 
 # Include dependencies
 -include $(DEPS)
 
-# Generate rules
-$(eval $(call generateRules, $(TARGETDIR)))
-
 directories:
-	$(HIDE)$(MKDIR)$(subst /,$(PSEP),$(TARGETDIR))
+	$(HIDE)$(MKDIR) $(subst /,$(PSEP),$(BUILDDIR))
 
 # Remove all objects
-
 clean:
-	$(HIDE)$(RM)$(wildcard $(BULDDIR)/*.o)
+	$(HIDE)$(RM) $(wildcard $(BULDDIR)/*.o)
+
 # Remove all objects, dependencies and executable files generated during the build
 fclean:
-	$(HIDE)(RM)$(subst /,$(BUILDDIR))
+	$(HIDE)(RM) $(subst /,$(PESP), $(BUILDDIR))
 	@echo Cleaning done !
 
 .PHONY: re clean fclean
