@@ -5,9 +5,9 @@
 # @version 0.1
 
 # Set the project, sources and build directory
-SOURCEDIR=sources/
-INCDIR=includes/
-BUILDDIR=build/
+SOURCEDIR=sources
+INCDIR=includes
+BUILDDIR=build
 
 # Define include directory
 INCLUDES = $(addprefix -I, $(INCDIR))
@@ -21,13 +21,8 @@ CC=gcc
 CFLAGS= -Wall -Wextra -Werror
 LDFLAGS=
 EXEC=ft_nm
-DEBUG=yes
 VERBOSE=TRUE
 
-# Add flag for debugging
-ifeq ($(DEBUG), yes)
-	CFLAGS += -g3 -fsanitize=address
-endif
 
 # Define verbose for compilation
 ifeq ($(VERBOSE), TRUE)
@@ -38,32 +33,38 @@ endif
 
 
 # Create a list of *.c sources in SOURCEDIR
-SOURCES = $(wildcard $(SOURCEDIR)*.c)
+SOURCES = $(wildcard $(SOURCEDIR)/*.c)
 
 # Define objects for all sources
-OBJS = $(patsubst ${SOURCEDIR}%.c,${BUILDDIR}%.o,${SOURCES})
+OBJS := $(patsubst ${SOURCEDIR}/%.c,${BUILDDIR}/%.o,${SOURCES})
 
 # Define dependencies files for all objects
 DEPS = $(OBJS:.o=.d)
 
 # Remove space after separator
-PSEP = $(strip $(SEP))
+
 
 # Creation of object files
-${BUILDDIR}%.o:	${SOURCEDIR}%.c ${INCLUDES}
+${BUILDDIR}/%.o: ${SOURCEDIR}/%.c
 	$(HIDE)${CC} -c ${CFLAGS} -o $@ $<
 
-# Creation of the executable
-$(EXEC): ${OBJS}
-	${CC} ${CFLAGS} -o ${EXEC} ${OBJS} ${LDFLAGS}
-
 all: directories ${EXEC}
+
+# Creation of the executable
+$(EXEC): $(OBJS)
+	@echo Linking $@
+	$(CC) $(CFLAGS) $(OBJS) -o $(EXEC)
 
 # Include dependencies
 -include $(DEPS)
 
+
+# Rule for sanitize the memory
+asan: CFLAGS += -g3 -fsanitize=address
+asan: all
+
 directories:
-	$(HIDE)$(MKDIR) $(subst /,$(PSEP),$(BUILDDIR))
+	$(HIDE)$(MKDIR) $(BUILDDIR)
 
 # Remove all objects
 clean:
@@ -71,7 +72,7 @@ clean:
 
 # Remove all objects, dependencies and executable files generated during the build
 fclean:
-	$(HIDE)(RM) $(subst /,$(PESP), $(BUILDDIR))
+	$(HIDE)$(RM) $(BUILDDIR) $(EXEC) $(EXEC).dSYM
 	@echo Cleaning done !
 
 .PHONY: re clean fclean
