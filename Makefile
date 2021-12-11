@@ -2,7 +2,7 @@
 # ft_nm
 #
 # @file
-# @version 0.1
+# @version 1.0
 
 # Set the project, sources and build directory
 SOURCEDIR=sources
@@ -21,7 +21,7 @@ CC=gcc
 CFLAGS= -Wall -Wextra -Werror
 LDFLAGS=
 EXEC=ft_nm
-VERBOSE=TRUE
+VERBOSE=FALSE
 
 
 # Define verbose for compilation
@@ -53,7 +53,7 @@ all: directories ${EXEC}
 # Creation of the executable
 $(EXEC): $(OBJS)
 	@echo Linking $@
-	$(CC) $(CFLAGS) $(OBJS) -o $(EXEC)
+	$(HIDE)$(CC) $(CFLAGS) $(OBJS) -o $(EXEC)
 
 # Include dependencies
 -include $(DEPS)
@@ -68,7 +68,7 @@ directories:
 
 # Remove all objects
 clean:
-	$(HIDE)$(RM) $(wildcard $(BULDDIR)/*.o)
+	$(HIDE)$(RM) $(wildcard $(BUILDDIR)/*.o)
 
 # Remove all objects, dependencies and executable files generated during the build
 fclean:
