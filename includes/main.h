@@ -4,9 +4,11 @@
 /*
  * INCLUDE LIBRARY OF FT_NM
 */
+
 #include "./o_error.h"
 #include "./r_elf32.h"
 #include "./r_elf64.h"
+
 /*
  * INCLUDE EXTERN LIBRARY
 */
