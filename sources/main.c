@@ -2,7 +2,7 @@
 #include <elf.h>
 #include <stdio.h>
 
-void m_read_file(char *file, char *ptr, struct stat *statbuf)
+void m_read_file(const char *file, const char *ptr, const struct stat *statbuf)
 {
   if ((unsigned char)ptr[EI_MAG0] == 0x7f &&
       (unsigned char)ptr[EI_MAG1] == 'E' &&
