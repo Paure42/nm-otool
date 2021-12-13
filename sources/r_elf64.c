@@ -46,13 +46,24 @@ void r_elf64(const void *ptr, const char *file)
   printf("there is %ld symbols in the table\n", sizeof(symtab));
   for (size_t i = 0; i < sizeof(symtab); i++)
     {
-      switch (ELF64_ST_BIND(symtab[i].st_info)) {
-      case STT_NOTYPE : // the symbol's type is not defined
-        printf("U\n");
-        break;
-      case STB_WEAK : // weak  symbols  resemble  global  symbols, but their definitions have lower precedence
-        s_weak(symtab[i]);
-        break;
-      }
+      if (symtab[i].st_value == SHN_ABS)
+        {
+          printf("A\n");
+        } // he symbol's value is absolute
+      else if (symtab[i].st_shndx == SHN_COMMON)
+        {
+          printf("C\n");
+        } // the symbol is common
+      else
+        {
+          switch (ELF64_ST_BIND(symtab[i].st_info)) {
+          case STT_NOTYPE : // the symbol's type is not defined
+            printf("U\n");
+            break;
+          case STB_WEAK : // weak  symbols  resemble  global  symbols, but their definitions have lower precedence
+            s_weak(symtab[i]);
+            break;
+          }
+        }
     }
 }
