@@ -11,10 +11,10 @@ void m_read_file(const char *file, const char *ptr, const struct stat *statbuf)
 	// if the file is an elf
 	switch ((unsigned char)ptr[EI_CLASS]) {
 	case ELFCLASS64: // if elf is 64 bits
-	  r_elf64(ptr, statbuf);
+	  r_elf64(ptr);
 	  break;
 	case ELFCLASS32: // if elf is 32 bits
-	  r_elf32(ptr, statbuf);
+	  r_elf32(ptr);
 	  break;
 	case ELFCLASSNONE: // error ?
 	  o_error(file, "Incorrect elf type");
