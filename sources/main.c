@@ -1,7 +1,64 @@
+#include "../includes/main.h"
 #include <stdio.h>
 
-int main(void)
+void m_read_file(char *ptr, struct stat *statbuf)
 {
-	printf("Hello World !");
-	return(0);
+	if (
+		(unsigned char)ptr[EI_MAG0] == 0x7f &&
+		(unsigned char)ptr[EI_MAG1] == 'E' &&
+		(unsigned char)ptr[EI_MAG2] == 'L' &&
+		(unsigned char)ptr[EI_MAG3] == 'F')
+	{
+		printf("It is an elf file");
+	}
+	(void)statbuf;
+}
+
+int m_open(const char *file)
+{
+	int fd;
+	char *ptr;
+	struct stat statbuf;
+
+	if ((fd = open(file, O_RDONLY)) < 0)
+	{
+		o_error(file, "No such file");
+		return (EXIT_FAILURE);
+	} // if open failed
+	if (fstat(fd, &statbuf) < 0)
+	{
+		o_error(file, "Cannot read stat");
+		return (EXIT_FAILURE);
+	} // if fstat failed
+	else if (S_ISREG(statbuf.st_mode) == false)
+	{
+		o_error(file, "Incorrect file type");
+		return (EXIT_FAILURE);
+	} // check if file is a regular file
+	ptr = mmap(NULL, statbuf.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+	if (ptr == MAP_FAILED)
+	{
+		o_error(file, "Mapping Failed\n");
+		return (EXIT_FAILURE);
+	} // if mapping failed
+
+	m_read_file(ptr, &statbuf);
+	munmap((void*)ptr, statbuf.st_size);
+	close(fd);
+	return (0);
+}
+
+int main(int argc, char *argv[])
+{
+	if (argc < 2)
+	{
+		m_open("a.out");
+	} // if there is no arguments, tries to open a.out by default.
+	else
+	{
+		for (int i = 1; i < argc; i++) {
+			m_open(argv[i]);
+		}
+	} // loop through all files in argv
+	return (EXIT_SUCCESS);
 }
