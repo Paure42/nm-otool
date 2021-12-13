@@ -1,5 +1,5 @@
-build
-build/*.o
+./build
+./build/*.o
 ft_nm
 *.dSYM/
 a.out
