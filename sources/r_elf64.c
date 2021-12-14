@@ -1,8 +1,6 @@
 #include "../includes/r_elf64.h"
 #include <stdio.h>
 
-
-
 static inline void s_weak(Elf64_Sym symtab)
 {
   if (ELF64_ST_BIND(symtab.st_info == STT_OBJECT))
@@ -30,13 +28,21 @@ void r_elf64(const void *ptr, const char *file)
 {
   Elf64_Ehdr *header = (Elf64_Ehdr*)ptr; // header in elf64 of ptr
   Elf64_Shdr *sections = (Elf64_Shdr*)((char*)ptr + header->e_shoff); // locate the section table in the header
+  char *strtab = (char *)(ptr+sections[header->e_shstrndx].sh_offset);
   Elf64_Sym *symtab = NULL;
   for (int i = 0; i < header->e_shnum; i++)
     {
-      if (sections[i].sh_type == SHT_SYMTAB) {
-        symtab = (Elf64_Sym*)((char*)ptr + sections[i].sh_offset);
-        break;
-      }
+      if (sections[i].sh_type == SHT_SYMTAB)
+        {
+          printf("Symobl table %s:\n",  strtab + sections[i].sh_name);
+          symtab = (Elf64_Sym*)((char*)ptr + sections[i].sh_offset); // locate the symbols table in the sections
+          char *symbol_names = (char *)(ptr + sections[sections[i].sh_link].sh_offset);
+          for (size_t j = 0; j < (sections[i].sh_size/sections[i].sh_entsize); j++)
+          {
+            printf("name : %s\n", symbol_names + symtab[j].st_name);
+          }
+          break;
+        }
     }
   if (symtab == NULL)
     {
@@ -44,26 +50,4 @@ void r_elf64(const void *ptr, const char *file)
       return;
     } // if there are no symbols in the table
   printf("there is %ld symbols in the table\n", sizeof(symtab));
-  for (size_t i = 0; i < sizeof(symtab); i++)
-    {
-      if (symtab[i].st_value == SHN_ABS)
-        {
-          printf("A\n");
-        } // he symbol's value is absolute
-      else if (symtab[i].st_shndx == SHN_COMMON)
-        {
-          printf("C\n");
-        } // the symbol is common
-      else
-        {
-          switch (ELF64_ST_BIND(symtab[i].st_info)) {
-          case STT_NOTYPE : // the symbol's type is not defined
-            printf("U\n");
-            break;
-          case STB_WEAK : // weak  symbols  resemble  global  symbols, but their definitions have lower precedence
-            s_weak(symtab[i]);
-            break;
-          }
-        }
-    }
 }

@@ -1,6 +1,10 @@
 #include "../includes/main.h"
 #include <elf.h>
 #include <stdio.h>
+#include <strings.h>
+
+int g_buf_size = 100;
+char *g_buffer = NULL;
 
 void m_read_file(const char *file, const char *ptr, const struct stat *statbuf)
 {
@@ -9,6 +13,7 @@ void m_read_file(const char *file, const char *ptr, const struct stat *statbuf)
 	  (unsigned char)ptr[EI_MAG2] == 'L' &&
 	  (unsigned char)ptr[EI_MAG3] == 'F') {
 	// if the file is an elf
+	bzero(g_buffer, g_buf_size); // TODO REPLACE WITH CUSTOM BZERO
 	switch ((unsigned char)ptr[EI_CLASS]) {
 	case ELFCLASS64: // if elf is 64 bits
 	  r_elf64(ptr, file);
@@ -61,6 +66,10 @@ int main(int argc, char *argv[])
 	} // if there is no arguments, tries to open a.out by default.
 	else
 	{
+    if ((g_buffer = malloc(g_buf_size * sizeof(char))) == 0)
+    {
+      return(EXIT_FAILURE);
+    } // allocate the buffer for the output
 		for (int i = 1; i < argc; i++) {
 			m_open(argv[i]);
 		}
