@@ -6,6 +6,7 @@
 */
 
 #include "./o_error.h"
+#include "./o_success.h"
 
 /*
  * Include extern library

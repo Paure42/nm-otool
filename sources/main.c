@@ -1,10 +1,13 @@
 #include "../includes/main.h"
-#include <elf.h>
-#include <stdio.h>
 #include <strings.h>
 
-int g_buf_size = 100;
-char *g_buffer = NULL;
+// TODO REPLACE STRLEN WITH CUSTOM STRLEN
+
+/*
+  * GLOBALE VARIABLES
+*/
+ int g_buf_size;
+ char *g_buffer;
 
 void m_read_file(const char *file, const char *ptr, const struct stat *statbuf)
 {
@@ -60,6 +63,9 @@ int m_open(const char *file) {
 
 int main(int argc, char *argv[])
 {
+  g_buffer = NULL;
+  g_buf_size = 4096;
+
 	if (argc < 2)
 	{
 		m_open("a.out");
@@ -72,6 +78,7 @@ int main(int argc, char *argv[])
     } // allocate the buffer for the output
 		for (int i = 1; i < argc; i++) {
 			m_open(argv[i]);
+      o_success();
 		}
 	} // loop through all files in argv
 	return (EXIT_SUCCESS);

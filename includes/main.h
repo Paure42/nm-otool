@@ -8,6 +8,7 @@
 #include "./o_error.h"
 #include "./r_elf32.h"
 #include "./r_elf64.h"
+#include "./o_success.h"
 
 /*
  * INCLUDE EXTERN LIBRARY
@@ -22,4 +23,11 @@
 #include <sys/mman.h>
 #include <stdbool.h>
 #include <elf.h>
+
+/*
+ * FUNCTIONS
+*/
+
+int main(int argc, char *argv[]);
+
 #endif // MAIN_H_
