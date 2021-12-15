@@ -50,3 +50,6 @@ For each symbol, nm shows:
 
 * Exceptions
 - If no object files are listed as arguments, nm assumes the file a.out.
+
+* Parsing
+https://www.blackhat.com/docs/us-14/materials/arsenal/us-14-Hernandez-Melkor-Slides.pdf
