@@ -62,18 +62,27 @@ static inline int s_elf64_header_values(const char *file, const void *ptr)
   return (0);
 }
 
-static inline void get_symbols_values(const Elf64_Sym *symtab, int i)
+static inline void get_symbols_values(const Elf64_Sym *symtab, int j)
   {
-    Elf64_Addr value = symtab[i].st_value;
+    Elf64_Addr value = symtab[j].st_value;
     snprintf((g_buffer + strlen(g_buffer)), (g_buf_size - strlen(g_buffer)), "value : %ld ", value);
   }
 
-static inline void get_symbols_names(const void *ptr, const Elf64_Shdr *sections, const Elf64_Sym *symtab, int i) // get symbols names
+static inline void get_symbols_names(const void *ptr, const Elf64_Shdr *sections, const Elf64_Sym *symtab, int i, int j)
+  {
+    char *strtab= (char *)(ptr + sections[sections[i].sh_link].sh_offset);
+    snprintf((g_buffer + strlen(g_buffer)), (g_buf_size - strlen(g_buffer)), "name : %s\n", strtab + symtab[j].st_name);
+  }
+
+static inline void get_symbols_attributes(const void *ptr, const Elf64_Shdr *sections, const Elf64_Sym *symtab, int i) // get symbols names
 {
-  char *strtab= (char *)(ptr + sections[sections[i].sh_link].sh_offset);
   for (size_t j = 0; j < (sections[i].sh_size/sections[i].sh_entsize); j++)
     {
-      snprintf((g_buffer + strlen(g_buffer)), (g_buf_size - strlen(g_buffer)), "name : %s\n", strtab + symtab[j].st_name);
+      if (symtab[j].st_size > 0)
+      {
+        get_symbols_values(symtab, j);
+        get_symbols_names(ptr, sections, symtab, i, j);
+      }
     }
 }
 
@@ -91,13 +100,8 @@ void r_elf64(const void *ptr, const char *file)
       if (sections[i].sh_type == SHT_SYMTAB)
         {
           symtab = (Elf64_Sym*)((char*)ptr + sections[i].sh_offset); // locate the symbols table in the sections
-          printf("SH_SIZE : %ld\nSH_ENTSIZE : %ld\nE_SHENTSIZE : %d\n", sections[i].sh_size, sections[i].sh_entsize, header->e_shentsize);
-          if (sections[i].sh_entsize == header->e_shentsize)
-            {
-              get_symbols_values(symtab, i);
-              get_symbols_names(ptr, sections, symtab, i);
-              break;
-            }
+          get_symbols_attributes(ptr, sections, symtab, i);
+          break;
         }
     } // TODO sanity checking to make sure that none of the
       // indexes are out of range for the section they are
