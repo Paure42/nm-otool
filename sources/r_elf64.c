@@ -65,21 +65,14 @@ static inline int s_elf64_header_values(const char *file, const void *ptr)
 
 static inline void get_symbols_values(const Elf64_Sym *symtab, int j)
   {
-    Elf64_Addr value = symtab[j].st_value;
-    snprintf((g_buffer + strlen(g_buffer)), (g_buf_size - strlen(g_buffer)), "value : %ld ", value);
+    snprintf((g_buffer + strlen(g_buffer)), (g_buf_size - strlen(g_buffer)), "%016x  ", (unsigned)symtab[j].st_value);
   }
 
 static inline void get_symbols_names(const void *ptr, const Elf64_Shdr *section_header, const Elf64_Sym *symtab, int i, int j)
   {
     char *strtab = (char *)(ptr + section_header[section_header[i].sh_link].sh_offset);
-    snprintf((g_buffer + strlen(g_buffer)), (g_buf_size - strlen(g_buffer)), "name : %s\n", strtab + symtab[j].st_name);
+    snprintf((g_buffer + strlen(g_buffer)), (g_buf_size - strlen(g_buffer)), " %s\n", strtab + symtab[j].st_name);
   }
-
-static inline void get_symbols_sections(const void *ptr, const Elf64_Shdr *section_header, const Elf64_Sym *symtab, int j, int i)
-{
-  char *strtab = (char *)(ptr + section_header[section_header[i].sh_link].sh_offset);
-  printf("SECTION HEADER NAME : %s\n", strtab + section_header[symtab[j].st_shndx].sh_name);
-}
 
 /* static inline void get_symbols_types(const void *ptr, const Elf64_Shdr *section_header, const Elf64_Sym *symtab, int j, int i) */
 /* { */
@@ -89,7 +82,7 @@ static inline void get_symbols_attributes(const void *ptr, const Elf64_Shdr *sec
 {
   for (size_t j = 0; j < (section_header[i].sh_size/section_header[i].sh_entsize); j++)
     {
-        get_symbols_values(symtab, j);
+        get_symbols_values(ptr, symtab, j);
         get_symbols_names(ptr, section_header, symtab, i, j);
         /* get_symbols_sections(ptr, section_header, symtab, j, i); */
     }
@@ -111,14 +104,6 @@ void r_elf64(const void *ptr, const char *file)
           symtab = (Elf64_Sym*)((char*)ptr + section_header[i].sh_offset);
           get_symbols_attributes(ptr, section_header, symtab, i);
         }
-      /* if (prog_header[i].p_type == PT_DYNAMIC) */
-      /*   { */
-      /*     Elf64_Dyn *dyn = (Elf64_Dyn*)((char*)ptr + prog_header[i].p_offset); */
-      /*     int j = 0; */
-      /*     while (dyn[j].d_tag != DT_SYMTAB) */
-      /*       j++; */
-      /*     Elf64_Sym *dyn_symtab = (Elf64_Sym*)((char*)ptr + dyn[j].d_un.d_ptr); */
-      /*   } */
     } // TODO sanity checking to make sure that none of the
       // indexes are out of range for the section they are
       // indexing into, and that sh_entsize and and e_shentsize
