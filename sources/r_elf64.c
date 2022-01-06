@@ -77,20 +77,21 @@ static inline void get_symbols_names(const void *ptr, const Elf64_Shdr *section_
 
 static inline void get_symbols_sections(const void *ptr, const Elf64_Shdr *section_header, const Elf64_Sym *symtab, int j, int i)
 {
-  char *strtab= (char *)(ptr + section_header[section_header[i].sh_link].sh_offset);
+  char *strtab = (char *)(ptr + section_header[section_header[i].sh_link].sh_offset);
   printf("SECTION HEADER NAME : %s\n", strtab + section_header[symtab[j].st_shndx].sh_name);
 }
+
+/* static inline void get_symbols_types(const void *ptr, const Elf64_Shdr *section_header, const Elf64_Sym *symtab, int j, int i) */
+/* { */
+/* } */
 
 static inline void get_symbols_attributes(const void *ptr, const Elf64_Shdr *section_header, const Elf64_Sym *symtab, int i)
 {
   for (size_t j = 0; j < (section_header[i].sh_size/section_header[i].sh_entsize); j++)
     {
-      if (symtab[j].st_size > 0)
-      {
         get_symbols_values(symtab, j);
         get_symbols_names(ptr, section_header, symtab, i, j);
         /* get_symbols_sections(ptr, section_header, symtab, j, i); */
-      }
     }
 }
 void r_elf64(const void *ptr, const char *file)
@@ -104,24 +105,20 @@ void r_elf64(const void *ptr, const char *file)
   /* Elf64_Phdr *prog_header = ((Elf64_Phdr*)((char*)ptr + header->e_phoff)); // locate the program header */
   for (int i = 0; i < header->e_shnum; i++)
     {
-      if (section_header[i].sh_type == SHT_SYMTAB)
+      if (section_header[i].sh_type == SHT_SYMTAB || section_header[i].sh_type == SHT_DYNSYM)
         {
           Elf64_Sym *symtab = NULL;
-          symtab = (Elf64_Sym*)((char*)ptr + section_header[i].sh_offset); // locate the symbols table in the sections
+          symtab = (Elf64_Sym*)((char*)ptr + section_header[i].sh_offset);
           get_symbols_attributes(ptr, section_header, symtab, i);
         }
-      else if (section_header[i].sh_type == SHT_DYNSYM)
-        {
-          Elf64_Sym *symtab = NULL;
-          symtab = (Elf64_Sym*)((char*)ptr + section_header[i].sh_offset); // locate the symbols table in the sections
-          get_symbols_attributes(ptr, section_header, symtab, i);
-        }
-      else if (section_header[i].sh_type == SHT_HASH)
-        {
-          Elf64_Sym *symtab = NULL;
-          symtab = (Elf64_Sym*)((char*)ptr + section_header[i].sh_offset); // locate the symbols table in the sections
-          get_symbols_attributes(ptr, section_header, symtab, i);
-        }
+      /* if (prog_header[i].p_type == PT_DYNAMIC) */
+      /*   { */
+      /*     Elf64_Dyn *dyn = (Elf64_Dyn*)((char*)ptr + prog_header[i].p_offset); */
+      /*     int j = 0; */
+      /*     while (dyn[j].d_tag != DT_SYMTAB) */
+      /*       j++; */
+      /*     Elf64_Sym *dyn_symtab = (Elf64_Sym*)((char*)ptr + dyn[j].d_un.d_ptr); */
+      /*   } */
     } // TODO sanity checking to make sure that none of the
       // indexes are out of range for the section they are
       // indexing into, and that sh_entsize and and e_shentsize

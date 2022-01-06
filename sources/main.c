@@ -126,21 +126,22 @@ int main(int argc, char *argv[])
   g_buffer = NULL;
   g_buf_size = 4096;
 
-	if (argc < 2)
-	{
-		m_open("a.out");
-	} // if there is no arguments, tries to open a.out by default.
-	else
-	{
-    if ((g_buffer = malloc(g_buf_size * sizeof(char))) == 0)
+  if ((g_buffer = malloc(g_buf_size * sizeof(char))) == 0)
     {
       return(EXIT_FAILURE);
     } // allocate the buffer for the output
-		for (int i = 1; i < argc; i++) {
-			m_open(argv[i]);
+  if (argc < 2)
+    {
+      m_open("a.out");
       o_success();
-		}
-	} // loop through all files in arg$
+    } // if there is no arguments, tries to open a.out by default.
+  else
+    {
+      for (int i = 1; i < argc; i++) {
+        m_open(argv[i]);
+        o_success();
+      }
+    } // loop through all files in arg$
   free(g_buffer);
-	return (EXIT_SUCCESS);
+  return (EXIT_SUCCESS);
 }
