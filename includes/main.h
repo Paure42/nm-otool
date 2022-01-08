@@ -1,6 +1,7 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
+
 /*
  * INCLUDE LIBRARY OF FT_NM
 */
@@ -9,6 +10,7 @@
 #include "./r_elf32.h"
 #include "./r_elf64.h"
 #include "./o_success.h"
+#include "./u_list.h"
 
 /*
  * INCLUDE EXTERN LIBRARY

@@ -3,11 +3,7 @@
 
 // TODO REPLACE STRLEN WITH CUSTOM STRLEN
 
-/*
-  * GLOBALE VARIABLES
-*/
- int g_buf_size;
- char *g_buffer;
+t_data **data;
 
 static inline int m_check_elf(const char *file, const char *ptr)
 {
@@ -67,33 +63,35 @@ static inline int m_check_elf(const char *file, const char *ptr)
   return (0);
 }
 
-static inline void m_read_file(const char *file, const char *ptr, const struct stat *statbuf)
+static inline int m_read_file(const char *file, const char *ptr)
 {
+  uint8_t ret;
+
   if ((unsigned char)ptr[EI_MAG0] == 0x7f &&
       (unsigned char)ptr[EI_MAG1] == 'E' &&
-	  (unsigned char)ptr[EI_MAG2] == 'L' &&
-	  (unsigned char)ptr[EI_MAG3] == 'F') {
-	// if the file is an elf
-	if (m_check_elf(file, ptr) == -1)
-    return;
-	bzero(g_buffer, g_buf_size); // TODO REPLACE WITH CUSTOM BZERO
-	switch ((unsigned char)ptr[EI_CLASS]) {
-	case ELFCLASS64: // if elf is 64 bits
-	  r_elf64(ptr, file);
-	  break;
-	case ELFCLASS32: // if elf is 32 bits
-	  r_elf32(ptr);
-	  break;
-  default:
-    o_error(file, "Incorrect elf type");
-    break;
-	}
+      (unsigned char)ptr[EI_MAG2] == 'L' &&
+      (unsigned char)ptr[EI_MAG3] == 'F') {
+    // if the file is an elf
+    if (m_check_elf(file, ptr) == -1)
+      return (-1);
+    switch ((unsigned char)ptr[EI_CLASS]) {
+    case ELFCLASS64: // if elf is 64 bits
+      ret = r_elf64(ptr, file);
+      return (ret);
+    case ELFCLASS32: // if elf is 32 bits
+      ret = r_elf32(ptr);
+      return (ret);
+    default:
+      o_error(file, "Incorrect elf type");
+      return (-1);
+    }
   }
-  (void)statbuf;
+  return (-1);
 }
 
 static inline int m_open(const char *file) {
   int fd;
+  uint8_t ret;
   char *ptr;
   struct stat statbuf;
 
@@ -115,33 +113,33 @@ static inline int m_open(const char *file) {
     return (EXIT_FAILURE);
   } // if mapping failed
 
-  m_read_file(file, ptr, &statbuf);
+  ret = m_read_file(file, ptr);
   munmap((void *)ptr, statbuf.st_size);
   close(fd);
-  return (0);
+  return (ret);
 }
 
 int main(int argc, char *argv[])
 {
-  g_buffer = NULL;
-  g_buf_size = 4096;
-
-  if ((g_buffer = malloc(g_buf_size * sizeof(char))) == 0)
-    {
-      return(EXIT_FAILURE);
-    } // allocate the buffer for the output
   if (argc < 2)
     {
+      if ((data = malloc(sizeof(t_data*))) == 0)
+        return(-1);
+      *data = NULL;
       m_open("a.out");
       o_success();
     } // if there is no arguments, tries to open a.out by default.
   else
     {
       for (int i = 1; i < argc; i++) {
-        m_open(argv[i]);
-        o_success();
+        if ((data = malloc(sizeof(t_data*))) == 0)
+          return(-1);
+        *data = NULL;
+        if (m_open(argv[i]) == 0)
+          o_success();
+        ft_lstclear(data);
+        data = NULL;
       }
-    } // loop through all files in arg$
-  free(g_buffer);
-  return (EXIT_SUCCESS);
+    } // loop through all files in argv
+  return (0);
 }

@@ -4,6 +4,6 @@
 #include <sys/stat.h>
 #include <elf.h>
 
-void r_elf32(const void *ptr);
+int r_elf32(const void *ptr);
 
 #endif // R_ELF32_H_

@@ -2,9 +2,9 @@
 #include <elf.h>
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 
-extern int  g_buf_size;
-extern char *g_buffer;
+extern t_data **data;
 
 static inline int s_elf64_machine(const char *file, const void *ptr)
 {
@@ -63,36 +63,46 @@ static inline int s_elf64_header_values(const char *file, const void *ptr)
   return (0);
 }
 
-static inline void get_symbols_values(const Elf64_Sym *symtab, int j)
-  {
-    snprintf((g_buffer + strlen(g_buffer)), (g_buf_size - strlen(g_buffer)), "%016x  ", (unsigned)symtab[j].st_value);
-  }
 
-static inline void get_symbols_names(const void *ptr, const Elf64_Shdr *section_header, const Elf64_Sym *symtab, int i, int j)
+static inline void get_symbols_names(const void *ptr, const Elf64_Shdr *section_header, const Elf64_Sym *symtab,
+                                     int i, int j, t_data *new)
   {
     char *strtab = (char *)(ptr + section_header[section_header[i].sh_link].sh_offset);
-    snprintf((g_buffer + strlen(g_buffer)), (g_buf_size - strlen(g_buffer)), " %s\n", strtab + symtab[j].st_name);
+    new->name = ft_strdup(strtab + symtab[j].st_name);
   }
 
-/* static inline void get_symbols_types(const void *ptr, const Elf64_Shdr *section_header, const Elf64_Sym *symtab, int j, int i) */
-/* { */
-/* } */
-
-static inline void get_symbols_attributes(const void *ptr, const Elf64_Shdr *section_header, const Elf64_Sym *symtab, int i)
+static inline void get_symbols_types(const Elf64_Sym *symtab, int j, t_data *new)
 {
-  for (size_t j = 0; j < (section_header[i].sh_size/section_header[i].sh_entsize); j++)
+  switch (ELF64_ST_TYPE(symtab[j].st_info))
     {
-        get_symbols_values(ptr, symtab, j);
-        get_symbols_names(ptr, section_header, symtab, i, j);
-        /* get_symbols_sections(ptr, section_header, symtab, j, i); */
+      case STB_WEAK :
+        new->type = 'w';
     }
 }
-void r_elf64(const void *ptr, const char *file)
+
+static inline int get_symbols_attributes(const void *ptr, const Elf64_Shdr *section_header,
+                                         const Elf64_Sym *symtab, int i)
+{
+  for (size_t j = 0;j < (section_header[i].sh_size / section_header[i].sh_entsize); j++)
+  {
+    t_data *new;
+    if (!(new = malloc(sizeof(t_data))))
+      return (-1);
+    new->value = symtab[j].st_value;
+    get_symbols_names(ptr, section_header, symtab, i, j, new);
+    /* get_symbols_types(symtab, j, new); */
+    /* get_symbols_sections(ptr, section_header, symtab, j, i); */
+    ft_push_back(data, new);
+  }
+  return (0);
+}
+
+int r_elf64(const void *ptr, const char *file)
 {
   if (s_elf64_machine(file, ptr) == -1)
-    return;
+    return (-1);
   if (s_elf64_header_values(file, ptr) == -1)
-    return;
+    return (-1);
   Elf64_Ehdr *header = (Elf64_Ehdr*)ptr; // header of elf64 file
   Elf64_Shdr *section_header = (Elf64_Shdr*)((char*)ptr + header->e_shoff); // locate the section header
   /* Elf64_Phdr *prog_header = ((Elf64_Phdr*)((char*)ptr + header->e_phoff)); // locate the program header */
@@ -102,15 +112,14 @@ void r_elf64(const void *ptr, const char *file)
         {
           Elf64_Sym *symtab = NULL;
           symtab = (Elf64_Sym*)((char*)ptr + section_header[i].sh_offset);
-          get_symbols_attributes(ptr, section_header, symtab, i);
+          if (get_symbols_attributes(ptr, section_header, symtab, i) == -1)
+            return (-1);
         }
-    } // TODO sanity checking to make sure that none of the
-      // indexes are out of range for the section they are
-      // indexing into, and that sh_entsize and and e_shentsize
-      // match the sizeof the structs you are using, just in case the ELF file has been corrupted
-  if (strlen(g_buffer) == 0)
+    }
+  if (!*data)
     {
-      snprintf(g_buffer, g_buf_size, "%s : no symbols", file);
-      return;
+      o_error(file, "no symbols");
+      return(-1);
     } // if there are no symbols in the table
+  return (0);
 }

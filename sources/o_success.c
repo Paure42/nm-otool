@@ -1,9 +1,15 @@
 #include "../includes/o_success.h"
 
-extern int  g_buf_size;
-extern char *g_buffer;
+extern t_data **data;
 
 void o_success()
 {
-  write(1, g_buffer, g_buf_size);
+  t_data *tmp;
+
+  tmp = *data;
+  while (tmp)
+  {
+    dprintf(1, "%016x %c %s\n", tmp->value, tmp->type, tmp->name);
+    tmp = tmp->next;
+  }
 }

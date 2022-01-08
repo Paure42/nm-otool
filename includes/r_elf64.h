@@ -2,19 +2,25 @@
 #define R_ELF64_H_
 
 /*
-  * Include library of ft_nm
+  * INCLUDE LIBRARY OF FT_NM
 */
 
 #include "./o_error.h"
 #include "./o_success.h"
+#include "u_list.h"
+#include "u_libft.h"
 
 /*
- * Include extern library
+ * INCLUDE EXTERN LIBRARY
 */
 
 #include <sys/stat.h>
 #include <elf.h>
 
-void r_elf64(const void *ptr, const char *file);
+/*
+ * FUNCTIONS
+*/
+
+int r_elf64(const void *ptr, const char *file);
 
 #endif // R_ELF64_H_

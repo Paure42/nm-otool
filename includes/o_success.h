@@ -2,10 +2,16 @@
 #define O_SUCCESS_H_
 
 /*
- * EXTERN LIBRARY
+ * LIBRARY OF FT_NM
 */
 
-#include <unistd.h>
+#include "u_list.h"
+
+/*
+ * INCLUDE EXTERN LIBRARY
+*/
+
+#include <stdio.h>
 
 /*
  * FUNCTIONS
