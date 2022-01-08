@@ -88,11 +88,18 @@ static inline int get_symbols_attributes(const void *ptr, const Elf64_Shdr *sect
     t_data *new;
     if (!(new = malloc(sizeof(t_data))))
       return (-1);
+    new->next = NULL;
     new->value = symtab[j].st_value;
     get_symbols_names(ptr, section_header, symtab, i, j, new);
     /* get_symbols_types(symtab, j, new); */
     /* get_symbols_sections(ptr, section_header, symtab, j, i); */
-    ft_push_back(data, new);
+    if (ft_strcmp(new->name, "") != 0)
+      ft_push_sort(data, new);
+    else {
+      free(new->name);
+      free(new);
+    } // add new to the list if the name of the symbol exists
+
   }
   return (0);
 }
