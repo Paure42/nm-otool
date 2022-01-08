@@ -1,7 +1,0 @@
-./build
-./build/*.o
-ft_nm
-*.dSYM/
-a.out
-DS_STORE
-.ccls-cache
