@@ -68,7 +68,7 @@ void ft_lstinsert_before(t_data **list, t_data *link, t_data *new)
   new->next = tmp->next;
   tmp->next = new;
 }
-
+#include <stdio.h>
 void ft_push_sort(t_data **list, t_data *new)
 {
   t_data *tmp;
@@ -81,24 +81,26 @@ void ft_push_sort(t_data **list, t_data *new)
     }
   else
     {
-      size_t nb = 0;
-      while (new->name[nb] != 0 && ft_isalpha(new->name[nb]) == 0)
-        nb++;
+      char *new_cap = ft_capitalize(new->name);
       while (tmp)
         {
-          size_t tb = 0;
-          while (tmp->name[tb] != 0 && ft_isalpha(tmp->name[tb]) == 0)
-            tb++;
-          if (ft_strcmp(tmp->name + tb, new->name + nb) > 0)
+          char *tmp_cap = ft_capitalize(tmp->name);
+          if (ft_strcmp(tmp_cap, new_cap) > 0)
             {
               if (tmp == *list)
                 ft_push_front(list, new);
               else
-                ft_lstinsert_before(list, tmp, new);
+                {
+                  ft_lstinsert_before(list, tmp, new);
+                }
+              free(tmp_cap);
+              free(new_cap);
               return;
             }
+          free(tmp_cap);
           tmp = tmp->next;
         }
+      free(new_cap);
       ft_push_back(list, new);
     }
 }
